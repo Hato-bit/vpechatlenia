@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>GeneratedZ</title>
+  <title>Эксперимент по доверию к лицам</title>
 
   <!-- jsPsych core + стили (через CDN) -->
   <script src="https://unpkg.com/jspsych@7.3.4"></script>
@@ -63,11 +63,14 @@
 
   const timeline = [];
 
+  // Версия эксперимента: для другой схемы меток поменяйте на "scheme_B" или другое имя
+  const EXPERIMENT_VERSION = "scheme_A";
+  // сюда положим ID участника после ввода
+  let subject_id = null;
+
   /********************************************
    * 1. Словарь текстов вопросов             *
-   *   (из genesis_questiontype (1).xlsx)    *
    ********************************************/
-
   const questions_dict = {
     attraction: "Насколько этот человек привлекателен?",
     intellect: "Насколько этот человек интеллектуален?",
@@ -76,130 +79,128 @@
 
   /********************************************
    * 2. Структура стимулов                   *
-   *   (из genesis_stimuli real.xlsx)        *
    ********************************************/
-
   const stimuli = [
-  { image: "img/portrait01.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait01.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait01.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait02.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait02.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait02.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait03.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait03.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait03.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait04.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait04.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait04.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait05.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait05.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait05.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait06.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait06.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait06.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait07.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait07.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait07.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait08.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait08.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait08.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait09.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait09.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait09.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait10.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait10.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait10.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait11.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait11.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait11.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait12.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait12.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait12.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait13.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait13.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait13.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait14.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait14.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait14.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait15.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait15.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait15.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait16.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait16.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait16.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait17.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait17.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait17.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait18.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait18.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait18.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait19.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait19.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait19.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait20.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait20.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait20.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait21.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait21.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait21.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait22.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait22.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait22.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait23.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait23.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait23.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait24.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait24.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait24.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait25.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait25.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait25.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait26.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait26.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait26.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait27.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait27.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait27.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait28.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait28.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait28.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait29.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait29.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait29.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait30.png", question: "trust", iv_source: "real" },
-  { image: "img/portrait30.png", question: "attraction", iv_source: "real" },
-  { image: "img/portrait30.png", question: "intellect", iv_source: "real" },
-  { image: "img/portrait31.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait31.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait31.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait32.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait32.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait32.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait33.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait33.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait33.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait34.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait34.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait34.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait35.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait35.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait35.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait36.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait36.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait36.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait37.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait37.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait37.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait38.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait38.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait38.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait39.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait39.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait39.png", question: "intellect", iv_source: "ai" },
-  { image: "img/portrait40.png", question: "trust", iv_source: "ai" },
-  { image: "img/portrait40.png", question: "attraction", iv_source: "ai" },
-  { image: "img/portrait40.png", question: "intellect", iv_source: "ai" }
+    { image: "img/portrait01.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait01.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait01.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait02.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait02.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait02.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait03.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait03.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait03.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait04.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait04.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait04.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait05.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait05.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait05.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait06.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait06.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait06.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait07.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait07.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait07.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait08.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait08.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait08.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait09.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait09.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait09.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait10.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait10.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait10.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait11.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait11.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait11.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait12.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait12.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait12.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait13.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait13.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait13.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait14.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait14.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait14.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait15.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait15.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait15.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait16.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait16.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait16.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait17.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait17.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait17.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait18.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait18.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait18.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait19.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait19.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait19.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait20.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait20.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait20.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait21.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait21.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait21.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait22.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait22.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait22.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait23.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait23.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait23.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait24.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait24.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait24.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait25.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait25.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait25.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait26.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait26.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait26.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait27.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait27.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait27.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait28.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait28.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait28.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait29.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait29.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait29.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait30.png", question: "trust", iv_source: "real" },
+    { image: "img/portrait30.png", question: "attraction", iv_source: "real" },
+    { image: "img/portrait30.png", question: "intellect", iv_source: "real" },
+    { image: "img/portrait31.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait31.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait31.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait32.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait32.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait32.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait33.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait33.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait33.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait34.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait34.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait34.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait35.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait35.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait35.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait36.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait36.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait36.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait37.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait37.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait37.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait38.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait38.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait38.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait39.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait39.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait39.png", question: "intellect", iv_source: "ai" },
+    { image: "img/portrait40.png", question: "trust", iv_source: "ai" },
+    { image: "img/portrait40.png", question: "attraction", iv_source: "ai" },
+    { image: "img/portrait40.png", question: "intellect", iv_source: "ai" }
   ];
 
   /***********************************************
@@ -244,6 +245,34 @@
   const sequence = validShuffle(stimuli, min_gap_photos);
 
   const images_to_preload = sequence.map(s => s.image);
+
+  /**************************************
+   * 3. Ввод кода участника             *
+   **************************************/
+  const enter_id = {
+    type: jsPsychSurveyText,
+    preamble: "<p>Пожалуйста, введите ваш код участника (или придумайте любую последовательность букв и цифр):</p>",
+    questions: [
+      { prompt: "Код участника:", name: "participant_id", required: true }
+    ],
+    button_label: "Далее",
+    data: { phase: "enter_id" },
+    on_finish: function(data) {
+      const responses = JSON.parse(data.responses);
+      const pid_raw = responses.participant_id || "";
+      const pid = pid_raw.trim();
+
+      // если по какой-то причине поле пустое, подстрахуемся случайным ID
+      subject_id = pid !== "" ? pid : jsPsych.randomization.randomID(10);
+
+      // добавляем ID и версию как свойства ко ВСЕМ последующим событиям
+      jsPsych.data.addProperties({
+        participant_id: subject_id,
+        version: EXPERIMENT_VERSION
+      });
+    }
+  };
+  timeline.push(enter_id);
 
   /******************************
    * 4. Предзагрузка стимулов   *
@@ -380,13 +409,13 @@
   /**************************************
    * 8. Отправка данных в DataPipe/OSF  *
    **************************************/
-  const subject_id = jsPsych.randomization.randomID(10);
-  const filename = `genesis_${subject_id}.csv`;
+  const sid_for_file = subject_id || jsPsych.randomization.randomID(10);
+  const filename = `genesis_${EXPERIMENT_VERSION}_${sid_for_file}.csv`;
 
   const save_data = {
     type: jsPsychPipe,
     action: "save",
-    experiment_id: "xbmFHJ1FoCIj", // ID из DataPipe
+    experiment_id: "xbmFHJ1FoCIj", // ID эксперимента из DataPipe
     filename: filename,
     data_string: () => jsPsych.data.get().csv()
   };
