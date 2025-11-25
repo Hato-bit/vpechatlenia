@@ -339,3 +339,97 @@
         },
         on_finish: function(data){
           data.rating_slider = data.response;
+          data.rating_rt = data.rt;
+        }
+      }
+    ],
+    timeline_variables: sequence,
+    randomize_order: false
+  };
+
+  timeline.push(trial_procedure);
+
+  /**************************************
+   * 7. Контрольные вопросы             *
+   **************************************/
+  const contr1 = {
+    type: jsPsychSurveyLikert,
+    preamble: "<p>Обращали ли вы внимание на возможные метки «AI-generated» на фотографиях?</p>",
+    questions: [
+      {
+        prompt: "",
+        labels: ["да", "нет"],
+        required: true
+      }
+    ],
+    data: { phase: "control_1" }
+  };
+  timeline.push(contr1);
+
+  const contr2 = {
+    type: jsPsychSurveyLikert,
+    preamble: "<p>Насколько вы, по вашему ощущению, склонны к техно-скепсису (недоверию к ИИ и другим технологиям)?</p>",
+    questions: [
+      {
+        prompt: "",
+        labels: ["1", "2", "3", "4", "5"],
+        required: true
+      }
+    ],
+    data: { phase: "control_2" }
+  };
+  timeline.push(contr2);
+
+  const contr3 = {
+    type: jsPsychSurveyText,
+    preamble: `
+      <p>Если у вас появлялись догадки о целях эксперимента, опишите их, пожалуйста.</p>
+      <p>Если догадок не было, можете оставить поле пустым и нажать кнопку.</p>
+    `,
+    questions: [
+      { prompt: "", rows: 6, columns: 60, name: "hypothesis_guess" }
+    ],
+    button_label: "Закончить",
+    data: { phase: "control_3" }
+  };
+  timeline.push(contr3);
+
+  /**************************************
+   * 8. Отправка данных в DataPipe/OSF  *
+   **************************************/
+  const sid_for_file = subject_id || jsPsych.randomization.randomID(10);
+  const filename = `genesis_${EXPERIMENT_VERSION}_${sid_for_file}.csv`;
+
+  const save_data = {
+    type: jsPsychPipe,
+    action: "save",
+    experiment_id: "xbmFHJ1FoCIj", // ID эксперимента из DataPipe
+    filename: filename,
+    data_string: () => jsPsych.data.get().csv()
+  };
+
+  timeline.push(save_data);
+
+  /**************************************
+   * 9. Финальный экран                 *
+   **************************************/
+  const end_screen = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+      <div class="instr" style="text-align:center;">
+        <p>Спасибо за участие!</p>
+        <p>Ваши ответы сохранены на защищённом сервере исследования.</p>
+        <p style="margin-top:30px;">Нажмите пробел, чтобы завершить.</p>
+      </div>
+    `,
+    choices: [" "],
+    data: { phase: "end" }
+  };
+  timeline.push(end_screen);
+
+  /**************************************
+   * 10. Запуск эксперимента            *
+   **************************************/
+  jsPsych.run(timeline);
+</script>
+</html>
