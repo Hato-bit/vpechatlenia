@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>GeneratedZ</title>
+  <title>Эксперимент по доверию к лицам</title>
 
   <!-- jsPsych core + стили (через CDN) -->
   <script src="https://unpkg.com/jspsych@7.3.4"></script>
@@ -65,8 +65,24 @@
 
   // Версия эксперимента: для другой схемы меток поменяйте на "scheme_B" или другое имя
   const EXPERIMENT_VERSION = "scheme_A";
-  // сюда положим ID участника после ввода
+  // сюда положим ID участника
   let subject_id = null;
+
+  // === ВВОД КОДА УЧАСТНИКА ЧЕРЕЗ PROMPT ===
+  (function getParticipantID() {
+    const raw = window.prompt(
+      "Пожалуйста, введите ваш код участника (можно придумать любую последовательность букв и цифр):",
+      ""
+    );
+    const trimmed = raw ? raw.trim() : "";
+    subject_id = trimmed !== "" ? trimmed : jsPsych.randomization.randomID(10);
+
+    // добавляем ID и версию ко всем последующим событиям
+    jsPsych.data.addProperties({
+      participant_id: subject_id,
+      version: EXPERIMENT_VERSION
+    });
+  })();
 
   /********************************************
    * 1. Словарь текстов вопросов             *
@@ -246,36 +262,6 @@
 
   const images_to_preload = sequence.map(s => s.image);
 
- /**************************************
- * 3. Ввод кода участника             *
- **************************************/
-const enter_id = {
-  type: jsPsychSurveyText,
-  preamble: "<p>Пожалуйста, введите ваш код участника (или придумайте любую последовательность букв и цифр):</p>",
-  questions: [
-    { prompt: "Код участника:", name: "participant_id", required: true }
-  ],
-  button_label: "Далее",
-  data: { phase: "enter_id" },
-  on_finish: function(data) {
-    // jsPsych 7: ответы лежат в data.response (объект)
-    const resp = data.response || {};
-    // берём либо named-поле, либо Q0 на всякий случай
-    const raw = (resp.participant_id || resp.Q0 || "").trim();
-
-    // если вдруг пусто – подстраховываемся случайным ID
-    subject_id = raw !== "" ? raw : jsPsych.randomization.randomID(10);
-
-    // добавляем ID и версию ко всем данным
-    jsPsych.data.addProperties({
-      participant_id: subject_id,
-      version: EXPERIMENT_VERSION
-    });
-  }
-};
-
-timeline.push(enter_id);
-
   /******************************
    * 4. Предзагрузка стимулов   *
    ******************************/
@@ -293,7 +279,7 @@ timeline.push(enter_id);
     <div class="instr">
       <p>Спасибо, что согласились принять участие в этом эксперименте.</p>
 
-      <p>Внешность служит важным источником информации при формировании мнения о целовеке. 
+      <p>Внешность служит важным источником информации при формировании мнения о человеке. 
       Мы исследуем влияние конкретных черт лица на впечатление о личностных характеристиках.</p>
 
       <p>Вам предстоит оценить характеристики моделей по фото их лиц. 
@@ -353,97 +339,3 @@ timeline.push(enter_id);
         },
         on_finish: function(data){
           data.rating_slider = data.response;
-          data.rating_rt = data.rt;
-        }
-      }
-    ],
-    timeline_variables: sequence,
-    randomize_order: false
-  };
-
-  timeline.push(trial_procedure);
-
-  /**************************************
-   * 7. Контрольные вопросы             *
-   **************************************/
-  const contr1 = {
-    type: jsPsychSurveyLikert,
-    preamble: "<p>Обращали ли вы внимание на возможные метки «AI-generated» на фотографиях?</p>",
-    questions: [
-      {
-        prompt: "",
-        labels: ["да", "нет"],
-        required: true
-      }
-    ],
-    data: { phase: "control_1" }
-  };
-  timeline.push(contr1);
-
-  const contr2 = {
-    type: jsPsychSurveyLikert,
-    preamble: "<p>Насколько вы, по вашему ощущению, склонны к техно-скепсису (недоверию к ИИ и другим технологиям)?</p>",
-    questions: [
-      {
-        prompt: "",
-        labels: ["1", "2", "3", "4", "5"],
-        required: true
-      }
-    ],
-    data: { phase: "control_2" }
-  };
-  timeline.push(contr2);
-
-  const contr3 = {
-    type: jsPsychSurveyText,
-    preamble: `
-      <p>Если у вас появлялись догадки о целях эксперимента, опишите их, пожалуйста.</p>
-      <p>Если догадок не было, можете оставить поле пустым и нажать кнопку.</p>
-    `,
-    questions: [
-      { prompt: "", rows: 6, columns: 60, name: "hypothesis_guess" }
-    ],
-    button_label: "Закончить",
-    data: { phase: "control_3" }
-  };
-  timeline.push(contr3);
-
-  /**************************************
-   * 8. Отправка данных в DataPipe/OSF  *
-   **************************************/
-  const sid_for_file = subject_id || jsPsych.randomization.randomID(10);
-  const filename = `genesis_${EXPERIMENT_VERSION}_${sid_for_file}.csv`;
-
-  const save_data = {
-    type: jsPsychPipe,
-    action: "save",
-    experiment_id: "xbmFHJ1FoCIj", // ID эксперимента из DataPipe
-    filename: filename,
-    data_string: () => jsPsych.data.get().csv()
-  };
-
-  timeline.push(save_data);
-
-  /**************************************
-   * 9. Финальный экран                 *
-   **************************************/
-  const end_screen = {
-    type: jsPsychHtmlKeyboardResponse,
-    stimulus: `
-      <div class="instr" style="text-align:center;">
-        <p>Спасибо за участие!</p>
-        <p>Ваши ответы сохранены на защищённом сервере исследования.</p>
-        <p style="margin-top:30px;">Нажмите пробел, чтобы завершить.</p>
-      </div>
-    `,
-    choices: [" "],
-    data: { phase: "end" }
-  };
-  timeline.push(end_screen);
-
-  /**************************************
-   * 10. Запуск эксперимента            *
-   **************************************/
-  jsPsych.run(timeline);
-</script>
-</html>
