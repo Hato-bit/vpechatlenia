@@ -246,33 +246,35 @@
 
   const images_to_preload = sequence.map(s => s.image);
 
-  /**************************************
-   * 3. Ввод кода участника             *
-   **************************************/
-  const enter_id = {
-    type: jsPsychSurveyText,
-    preamble: "<p>Пожалуйста, введите ваше Имя и Фамилию:</p>",
-    questions: [
-      { prompt: "Код участника:", name: "participant_id", required: true }
-    ],
-    button_label: "Далее",
-    data: { phase: "enter_id" },
-    on_finish: function(data) {
-      const responses = JSON.parse(data.responses);
-      const pid_raw = responses.participant_id || "";
-      const pid = pid_raw.trim();
+ /**************************************
+ * 3. Ввод кода участника             *
+ **************************************/
+const enter_id = {
+  type: jsPsychSurveyText,
+  preamble: "<p>Пожалуйста, введите ваш код участника (или придумайте любую последовательность букв и цифр):</p>",
+  questions: [
+    { prompt: "Код участника:", name: "participant_id", required: true }
+  ],
+  button_label: "Далее",
+  data: { phase: "enter_id" },
+  on_finish: function(data) {
+    // jsPsych 7: ответы лежат в data.response (объект)
+    const resp = data.response || {};
+    // берём либо named-поле, либо Q0 на всякий случай
+    const raw = (resp.participant_id || resp.Q0 || "").trim();
 
-      // если по какой-то причине поле пустое, подстрахуемся случайным ID
-      subject_id = pid !== "" ? pid : jsPsych.randomization.randomID(10);
+    // если вдруг пусто – подстраховываемся случайным ID
+    subject_id = raw !== "" ? raw : jsPsych.randomization.randomID(10);
 
-      // добавляем ID и версию как свойства ко ВСЕМ последующим событиям
-      jsPsych.data.addProperties({
-        participant_id: subject_id,
-        version: EXPERIMENT_VERSION
-      });
-    }
-  };
-  timeline.push(enter_id);
+    // добавляем ID и версию ко всем данным
+    jsPsych.data.addProperties({
+      participant_id: subject_id,
+      version: EXPERIMENT_VERSION
+    });
+  }
+};
+
+timeline.push(enter_id);
 
   /******************************
    * 4. Предзагрузка стимулов   *
