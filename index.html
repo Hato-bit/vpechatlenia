@@ -88,21 +88,47 @@
     const EXPERIMENT_VERSION = "scheme_A";
     let subject_id = null;
 
-    // --- Ввод кода участника через prompt ---
-    (function getParticipantID() {
-      let raw = window.prompt(
-        "Пожалуйста, введите ваши Имя и Фамилию:",
-        ""
-      );
-      if (raw === null) raw = "";
-      raw = raw.trim();
-      subject_id = raw !== "" ? raw : jsPsych.randomization.randomID(10);
+    // --- Ввод кода участника через prompt (нельзя пропустить) ---
+(function getParticipantID() {
+  let pid = null;
 
-      jsPsych.data.addProperties({
-        participant_id: subject_id,
-        version: EXPERIMENT_VERSION
-      });
-    })();
+  while (!pid) {
+    const raw = window.prompt(
+      "Пожалуйста, введите ваше Имя и Фамилию:",
+      ""
+    );
+
+    // Нажали "Отмена" или закрыли окно → спрашиваем снова
+    if (raw === null) {
+      continue;
+    }
+
+    // Убираем пробелы по краям
+    const trimmed = raw.trim();
+
+    // Если пусто или только пробелы → показываем предупреждение и спрашиваем снова
+    if (trimmed.length === 0) {
+      alert("Пожалуйста, введите ваше Имя и Фамилию (хотя бы одну букву).");
+      continue;
+    }
+
+    // Если нужно, можно дополнительно отфильтровать только буквы/цифры:
+    // if (!/^[A-Za-zА-Яа-я0-9_-]+$/.test(trimmed)) {
+    //   alert("Разрешены только буквы, цифры, дефис и подчёркивание.");
+    //   continue;
+    // }
+
+    pid = trimmed; // валидный ID
+  }
+
+  subject_id = pid;
+
+  jsPsych.data.addProperties({
+    participant_id: subject_id,
+    version: EXPERIMENT_VERSION
+  });
+})();
+
 
     // -------- 1. Словарь текстов вопросов --------
     const questions_dict = {
