@@ -340,47 +340,50 @@
     timeline.push(instr);
 
     // -------- 6. Основной блок trial'ов --------
-    let sliderSpaceListener = null;
-    const trial_procedure = {
-      timeline: [
-        {
-          type: jsPsychHtmlSliderResponse,
-          stimulus: function() {
-            const img_path = jsPsych.timelineVariable('image');
-            const question_code = jsPsych.timelineVariable('question');
-            const question_text = questions_dict[question_code] || question_code;
+let sliderSpaceListener = null;
 
-            return `
-              <div class="face-container">
-                <img src="${img_path}" alt="face">
-                <div class="question-text">${question_text}</div>
-              </div>
-            `;
-          },
-          min: 1,
-          max: 10,
-          step: 1,
-          slider_start: 5,
-          labels: ["1","2","3","4","5","6","7","8","9","10"],
-          require_movement: true,
-          prompt: "<p style='text-align:center; margin-top:20px;'>Выберите ответ на шкале и нажмите кнопку ниже или пробел.</p>",
-          button_label: "Далее",
-          data: {
-            phase: "trial",
-            image: jsPsych.timelineVariable('image'),
-            question_code: jsPsych.timelineVariable('question'),
-            iv_source: jsPsych.timelineVariable('iv_source')
-          },
-          on_load: function() {
-        const btn = document.querySelector('#jspsych-html-slider-response-next');
+const trial_procedure = {
+  timeline: [
+    {
+      type: jsPsychHtmlSliderResponse,
+      stimulus: function() {
+        var img_path = jsPsych.timelineVariable('image');
+        var question_code = jsPsych.timelineVariable('question');
+        var question_text = questions_dict[question_code] || question_code;
 
-        // обработчик, который будет вызываться при нажатии пробела
+        // HTML для лица и вопроса
+        return (
+          '<div class="face-container">' +
+            '<img src="' + img_path + '" alt="face">' +
+            '<div class="question-text">' + question_text + '</div>' +
+          '</div>'
+        );
+      },
+      min: 1,
+      max: 10,
+      step: 1,
+      slider_start: 5,
+      labels: ["1","2","3","4","5","6","7","8","9","10"],
+      require_movement: true,
+      prompt: "<p style='text-align:center; margin-top:20px;'>Выберите ответ на шкале и нажмите кнопку ниже.</p>",
+      button_label: "Далее",
+      data: {
+        phase: "trial",
+        image: jsPsych.timelineVariable('image'),
+        question_code: jsPsych.timelineVariable('question'),
+        iv_source: jsPsych.timelineVariable('iv_source')
+      },
+
+      // --- пробел как альтернатива кнопке "Далее" ---
+      on_load: function() {
+        var btn = document.querySelector('#jspsych-html-slider-response-next');
+
         sliderSpaceListener = function(e) {
           if (e.code === 'Space' || e.key === ' ' || e.key === 'Spacebar') {
-            e.preventDefault(); // чтобы не скроллило страницу
+            e.preventDefault();
+            // кнопка активируется только после движения слайдера,
+            // поэтому до ответа пробел ничего не делает
             if (btn && !btn.disabled) {
-              // кнопка становится активной только после движения слайдера,
-              // поэтому до ответа пробел НИЧЕГО не делает
               btn.click();
             }
           }
@@ -390,22 +393,20 @@
       },
 
       on_finish: function(data) {
-        // снимаем обработчик, чтобы не накапливались слушатели
+        // снимаем обработчик, чтобы не копились слушатели
         if (sliderSpaceListener) {
           document.removeEventListener('keydown', sliderSpaceListener);
           sliderSpaceListener = null;
         }
-          on_finish: function(data) {
-            data.rating_slider = data.response;
-            data.rating_rt = data.rt;
-          }
-        }
-      ],
-      timeline_variables: sequence,
-      randomize_order: false
-    };
 
-    timeline.push(trial_procedure);
+        data.rating_slider = data.response;
+        data.rating_rt = data.rt;
+      }
+    }
+  ],
+  timeline_variables: sequence,
+  randomize_order: false
+};
 
     // -------- 7. Контрольные вопросы --------
     const contr1 = {
