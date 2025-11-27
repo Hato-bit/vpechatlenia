@@ -411,6 +411,25 @@
     };
     timeline.push(contr2);
 
+    const age_question = {
+  type: jsPsychSurveyLikert,
+  preamble: '<p>Пожалуйста, укажите ваш возраст.</p>',
+  questions: [{
+    prompt: '',
+    labels: [
+      'младше 18',
+      '18–24',
+      '25–34',
+      '35–44',
+      '45–54',
+      '55 и старше'
+    ],
+    required: true
+  }],
+  data: { task: 'age' }
+};
+timeline.push(age_question);
+
     const contr3 = {
       type: jsPsychSurveyText,
       preamble: `
