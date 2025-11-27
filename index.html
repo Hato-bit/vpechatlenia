@@ -410,7 +410,44 @@
       data: { phase: "control_2" }
     };
     timeline.push(contr2);
+    
+    const age_question = {
+  type: jsPsychSurveyText,
+  preamble: "<p>Пожалуйста, укажите ваш возраст.</p>",
+  questions: [
+    {
+      prompt: "",
+      placeholder: "",
+      columns: 10,
+      name: "age",
+      required: true
+    }
+  ],
+  data: { phase: "control_age" },
+  on_finish: function(data) {
+    const raw = (data.response.age || "").trim();
+    const re = /^[0-9]{1,2}$/; // только 1–2 цифры
+    const valid = re.test(raw);
+    data.age_input = raw;
+    data.age_valid = valid;
+    if (valid) {
+      data.age_numeric = parseInt(raw, 10);
+    }
+  }
+};
+    const age_question_loop = {
+  timeline: [age_question],
+  loop_function: function(data) {
+    const last = data.values()[0];
+    if (!last.age_valid) {
+      alert("Пожалуйста, введите возраст двумя цифрами, используя только числа (например, 22).");
+      return true;  // повторить вопрос
+    }
+    return false;   // всё ок, идём дальше
+  }
+};
 
+timeline.push(age_question_loop);
 
     const contr3 = {
       type: jsPsychSurveyText,
